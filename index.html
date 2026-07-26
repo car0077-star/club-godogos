@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#221E1A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="iconos/icono-192.png">
+<title>Club Godogos</title>
+<style>
+  :root{ --mostaza:#F2B01E; --tinta:#221E1A; --catsup:#C4362B; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{
+    height:100%;width:100%;overflow:hidden;background:var(--tinta);
+    overscroll-behavior:none;-webkit-tap-highlight-color:transparent;
+  }
+  #app{
+    position:fixed;inset:0;width:100%;height:100%;border:0;display:block;
+    padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
+    background:var(--mostaza);
+  }
+
+  /* pantalla de arranque */
+  #splash{
+    position:fixed;inset:0;background:var(--mostaza);z-index:10;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    font-family:system-ui,-apple-system,sans-serif;transition:opacity .35s ease;
+  }
+  #splash.fuera{opacity:0;pointer-events:none}
+  #splash img{width:96px;height:96px;border-radius:20px;box-shadow:0 8px 20px rgba(60,40,0,.28)}
+  #splash p{color:var(--tinta);font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:600}
+  .puntos{display:flex;gap:6px}
+  .puntos i{width:7px;height:7px;border-radius:50%;background:var(--tinta);opacity:.25;animation:late 1.1s infinite}
+  .puntos i:nth-child(2){animation-delay:.15s}
+  .puntos i:nth-child(3){animation-delay:.3s}
+  @keyframes late{0%,100%{opacity:.25}50%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){ .puntos i{animation:none} }
+
+  /* aviso de sin conexión */
+  #caido{
+    position:fixed;inset:0;background:var(--tinta);color:#fff;z-index:20;display:none;
+    flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:32px;
+    text-align:center;font-family:system-ui,-apple-system,sans-serif;
+  }
+  #caido.ver{display:flex}
+  #caido h1{color:var(--mostaza);font-size:24px;letter-spacing:.02em}
+  #caido p{font-size:15px;line-height:1.5;color:#B8B1A7;max-width:320px}
+  #caido button{
+    margin-top:6px;padding:14px 26px;border:0;border-radius:10px;background:var(--mostaza);
+    color:var(--tinta);font-size:16px;font-weight:700;cursor:pointer;
+  }
+
+  /* recarga discreta: sin barra de direcciones hace falta una salida */
+  #recargar{
+    position:fixed;z-index:15;right:calc(10px + env(safe-area-inset-right));
+    bottom:calc(10px + env(safe-area-inset-bottom));
+    width:38px;height:38px;border-radius:50%;border:0;cursor:pointer;
+    background:rgba(34,30,26,.30);color:#fff;font-size:17px;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+  }
+  #recargar:active{background:rgba(34,30,26,.65)}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <img src="iconos/icono-192.png" alt="">
+  <p>Club Godogos</p>
+  <div class="puntos"><i></i><i></i><i></i></div>
+</div>
+
+<div id="caido">
+  <h1>Sin conexión</h1>
+  <p>La pantalla del club necesita internet para registrar visitas.
+     Revisa el wifi de la terminal y vuelve a intentar.</p>
+  <p style="font-size:13px;color:#8B857C">Mientras tanto, anota el WhatsApp en papel
+     y regístralo cuando vuelva la señal. No pierdas al cliente.</p>
+  <button onclick="reintentar()">Volver a intentar</button>
+</div>
+
+<iframe id="app" title="Club Godogos" allow="clipboard-write"></iframe>
+
+<button id="recargar" onclick="recargar()" aria-label="Recargar la pantalla">&#10227;</button>
+
+<script>
+  /* =====================================================================
+     ÚNICA LÍNEA QUE DEBES CAMBIAR
+     Pega aquí la URL /exec de tu aplicación web de Apps Script.
+     Para la pantalla del cliente, usa la misma URL con ?v=cliente
+     ===================================================================== */
+  var APP_URL = 'https://script.google.com/macros/s/PEGA_TU_ID_AQUI/exec';
+  /* ===================================================================== */
+
+  var marco = document.getElementById('app');
+  var splash = document.getElementById('splash');
+  var caido = document.getElementById('caido');
+  var cargado = false;
+
+  function abrir(){
+    cargado = false;
+    caido.classList.remove('ver');
+    marco.src = APP_URL + (APP_URL.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+    // si en 15 segundos no cargó, algo pasa con la red
+    setTimeout(function(){ if(!cargado) caido.classList.add('ver'); }, 15000);
+  }
+
+  marco.addEventListener('load', function(){
+    cargado = true;
+    splash.classList.add('fuera');
+    caido.classList.remove('ver');
+  });
+
+  function recargar(){ splash.classList.remove('fuera'); abrir(); }
+  function reintentar(){ recargar(); }
+
+  window.addEventListener('online', function(){ if(!cargado) recargar(); });
+  window.addEventListener('offline', function(){ caido.classList.add('ver'); });
+
+  if(!navigator.onLine){ caido.classList.add('ver'); } else { abrir(); }
+
+  // evitar zoom por doble toque en la terminal
+  var ultimoToque = 0;
+  document.addEventListener('touchend', function(e){
+    var ahora = Date.now();
+    if(ahora - ultimoToque < 300) e.preventDefault();
+    ultimoToque = ahora;
+  }, { passive:false });
+
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  }
+</script>
+</body>
+</html>
