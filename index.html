@@ -17,9 +17,19 @@
     height:100%;width:100%;overflow:hidden;background:var(--tinta);
     overscroll-behavior:none;-webkit-tap-highlight-color:transparent;
   }
-  #app{
-    position:fixed;inset:0;width:100%;height:100%;border:0;display:block;
+  /* Google inyecta un aviso arriba de las apps de Apps Script publicadas
+     con acceso anónimo. No se puede quitar; se recorta desplazando el
+     iframe hacia arriba dentro de un contenedor con overflow oculto.
+     Si algún día cambia la altura del aviso, ajusta --aviso. */
+  :root{ --aviso:42px }
+  #ventana{
+    position:fixed;inset:0;overflow:hidden;background:var(--mostaza);
     padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
+  }
+  #app{
+    position:absolute;left:0;width:100%;border:0;display:block;
+    top:calc(var(--aviso) * -1);
+    height:calc(100% + var(--aviso));
     background:var(--mostaza);
   }
 
@@ -81,7 +91,9 @@
   <button onclick="reintentar()">Volver a intentar</button>
 </div>
 
-<iframe id="app" title="Club Godogos" allow="clipboard-write"></iframe>
+<div id="ventana">
+  <iframe id="app" title="Club Godogos" allow="clipboard-write"></iframe>
+</div>
 
 <button id="recargar" onclick="recargar()" aria-label="Recargar la pantalla">&#10227;</button>
 
@@ -91,7 +103,7 @@
      Pega aquí la URL /exec de tu aplicación web de Apps Script.
      Para la pantalla del cliente, usa la misma URL con ?v=cliente
      ===================================================================== */
-  var APP_URL = 'https://script.google.com/macros/s/AKfycbz9m-aKFP9ZeAFVCASa7yf2hnqmSKe5Nve4Eq7taGMVPS-tPRJg0tOfg-dPNk1z-Qef/exec';
+  var APP_URL = 'https://script.google.com/macros/s/PEGA_TU_ID_AQUI/exec';
   /* ===================================================================== */
 
   var marco = document.getElementById('app');
