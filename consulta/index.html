@@ -1,1 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --tinta:#221E1A;
+    --mostaza:#F2B01E;
+    --mostaza-honda:#A9740A;
+    --papel:#FCFAF4;
+    --catsup:#C4362B;
+    --pepinillo:#4A7A3B;
+    --humo:#948D82;
+    --linea:#D9D0BE;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    background:var(--mostaza);
+    background-image:radial-gradient(circle at 50% 0%, #F7C24A 0%, var(--mostaza) 55%);
+    font-family:'Archivo',system-ui,sans-serif;color:var(--tinta);
+    padding:26px 16px 48px;display:flex;justify-content:center;
+  }
+  .marco{width:100%;max-width:372px}
+
+  /* ---------- el ticket ---------- */
+  .ticket{
+    position:relative;background:var(--papel);padding:26px 22px 20px;
+    box-shadow:0 14px 28px rgba(60,40,0,.22);
+  }
+  .ticket::before,.ticket::after{
+    content:'';position:absolute;left:0;right:0;height:11px;
+    background-image:
+      linear-gradient(45deg, transparent 33.4%, var(--papel) 33.4%, var(--papel) 66.6%, transparent 66.6%),
+      linear-gradient(-45deg, transparent 33.4%, var(--papel) 33.4%, var(--papel) 66.6%, transparent 66.6%);
+    background-size:14px 22px;
+  }
+  .ticket::before{top:-11px}
+  .ticket::after{bottom:-11px;transform:rotate(180deg)}
+
+  .imprime{animation:salir .7s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes salir{from{transform:translateY(-14px);opacity:0}to{transform:none;opacity:1}}
+  @media (prefers-reduced-motion:reduce){ .imprime{animation:none} }
+
+  /* ---------- tipografía de recibo ---------- */
+  .cabeza{text-align:center;border-bottom:2px dashed var(--linea);padding-bottom:16px}
+  .cabeza h1{font-family:'Anton';font-size:30px;letter-spacing:.05em;margin:0;text-transform:uppercase;line-height:.95}
+  .cabeza p{font-family:'Space Mono';font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--humo);margin:8px 0 0}
+
+  .lineas{margin:16px 0 0;font-family:'Space Mono';font-size:12.5px}
+  .fila{display:flex;align-items:baseline;gap:6px;padding:4px 0}
+  .fila span:first-child{text-transform:uppercase;letter-spacing:.1em;color:var(--humo);font-size:10.5px;white-space:nowrap}
+  .fila i{flex:1;border-bottom:1.5px dotted var(--linea);transform:translateY(-3px)}
+  .fila b{font-weight:700;white-space:nowrap}
+
+  /* ---------- el sello de visitas ---------- */
+  .titular{margin:22px 0 0;text-align:center}
+  .titular .grande{font-family:'Anton';font-size:64px;line-height:.85;letter-spacing:-.01em;display:block}
+  .titular .chico{font-family:'Space Mono';font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--humo)}
+
+  .sellos{display:flex;gap:4px;justify-content:center;margin:18px 0 4px;flex-wrap:wrap}
+  .sello{
+    width:22px;height:28px;border:1.5px solid var(--linea);border-radius:3px;background:#fff;
+    position:relative;
+  }
+  .sello.lleno{background:var(--tinta);border-color:var(--tinta)}
+  .sello.premio{border-color:var(--catsup);border-width:2px}
+  .sello.premio.lleno{background:var(--catsup);border-color:var(--catsup)}
+
+  .escala{border-top:2px dashed var(--linea);margin-top:20px;padding-top:14px}
+  .escala h2{font-family:'Space Mono';font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--humo);margin:0 0 10px;font-weight:400}
+  .paso{display:flex;align-items:baseline;gap:8px;font-family:'Space Mono';font-size:12.5px;padding:5px 0}
+  .paso .n{width:26px;font-weight:700}
+  .paso .p{flex:1}
+  .paso .m{font-size:14px}
+  .paso.hecho{color:var(--pepinillo)}
+  .paso.hecho .p{text-decoration:line-through;text-decoration-thickness:1px}
+  .paso.hoy .p{font-weight:700}
+
+  /* ---------- cupón desprendible ---------- */
+  .perforado{position:relative;height:24px;background:var(--papel);overflow:hidden}
+  .perforado::after{
+    content:'';position:absolute;top:50%;left:12px;right:12px;
+    border-top:2px dashed #C7BCA6;
+  }
+  .muesca{position:absolute;top:50%;width:20px;height:20px;border-radius:50%;
+    background:var(--mostaza);transform:translateY(-50%)}
+  .muesca.izq{left:-10px}
+  .muesca.der{right:-10px}
+
+  .cupon{
+    background:var(--papel);padding:4px 22px 26px;text-align:center;position:relative;
+    box-shadow:0 14px 28px rgba(60,40,0,.22);
+  }
+  .cupon .et{font-family:'Space Mono';font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--humo);margin:0 0 8px}
+  .cupon .premio{font-family:'Anton';font-size:26px;text-transform:uppercase;letter-spacing:.03em;margin:0;line-height:1.05}
+  .cupon .nota{font-size:13px;color:#5c534a;margin:10px 0 0;line-height:1.45}
+
+  .pie{text-align:center;font-family:'Space Mono';font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--mostaza-honda);margin:26px 0 0}
+
+  /* ---------- formulario ---------- */
+  .consulta{padding-top:6px}
+  .consulta label{display:block;font-family:'Space Mono';font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--humo);margin:0 0 8px}
+  .consulta input{
+    width:100%;font-family:'Space Mono';font-weight:700;font-size:26px;text-align:center;
+    letter-spacing:.08em;padding:13px 8px;border:2px solid var(--tinta);border-radius:8px;
+    background:#fff;color:var(--tinta);
+  }
+  .consulta button{
+    width:100%;margin-top:12px;padding:16px;border:0;border-radius:8px;background:var(--tinta);
+    color:var(--mostaza);font-family:'Anton';font-size:19px;letter-spacing:.08em;
+    text-transform:uppercase;cursor:pointer;
+  }
+  .consulta button:disabled{opacity:.4}
+  .recado{margin:16px 0 0;font-size:14px;line-height:1.5;text-align:center}
+  .recado.malo{color:var(--catsup);font-weight:600}
+  .oculto{display:none !important}
+</style>
+</head>
+<body>
+<div class="marco" id="marco">
+
+  <!-- consulta por teléfono -->
+  <div id="vistaConsulta">
+    <div class="ticket imprime">
+      <div class="cabeza">
+        <h1>CLUB GODOGOS</h1>
+        <p>Consulta tus visitas</p>
+      </div>
+      <div class="consulta">
+        <label for="tel">Tu WhatsApp, 10 dígitos</label>
+        <input id="tel" type="tel" inputmode="numeric" maxlength="14" placeholder="8110000000" autocomplete="off">
+        <button id="btn" onclick="consultar()" disabled>Ver mis visitas</button>
+        <p class="recado" id="recado">¿Todavía no eres del club?
+        <a href="../alta/" style="color:var(--catsup);font-weight:600">Regístrate aquí</a>
+        y te guardamos tu regalo de bienvenida.</p>
+      </div>
+    </div>
+    <p class="pie">Martes a sábado · Godogos</p>
+  </div>
+
+  <!-- estado del cliente -->
+  <div id="vistaEstado" class="oculto"></div>
+</div>
+
+<script>
+  /* ====================================================================
+     ÚNICA LÍNEA QUE DEBES CAMBIAR: la URL /exec de tu app de Apps Script
+     ==================================================================== */
+  var API = 'https://script.google.com/macros/s/PEGA_TU_ID_AQUI/exec';
+  /* ==================================================================== */
+
+  var TOKEN = new URLSearchParams(location.search).get('c') || '';
+
+  function llamarApi(cuerpo, exito, falla){
+    fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(cuerpo),
+      redirect: 'follow'
+    })
+    .then(function(r){ return r.json(); })
+    .then(exito)
+    .catch(function(){ jsonp(cuerpo, exito, falla); });
+  }
+
+  function jsonp(cuerpo, exito, falla){
+    var fn = 'cg' + Date.now();
+    var q = new URLSearchParams({
+      api: cuerpo.accion, callback: fn,
+      tel: cuerpo.tel || '', c: cuerpo.token || ''
+    });
+    var sc = document.createElement('script');
+    var listo = false;
+    window[fn] = function(res){ listo = true; exito(res); limpiar(); };
+    function limpiar(){ try{ delete window[fn]; sc.remove(); }catch(e){} }
+    sc.onerror = function(){ falla(); limpiar(); };
+    setTimeout(function(){ if(!listo){ falla(); limpiar(); } }, 12000);
+    sc.src = API + '?' + q.toString();
+    document.body.appendChild(sc);
+  }
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+
+  var i = document.getElementById('tel');
+  i.addEventListener('input', function(){
+    document.getElementById('btn').disabled = (this.value.replace(/\D/g,'').length !== 10);
+  });
+  i.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && !document.getElementById('btn').disabled) consultar();
+  });
+
+  function consultar(){
+    var t = i.value.replace(/\D/g,'');
+    var r = document.getElementById('recado');
+    r.className = 'recado';
+    r.textContent = 'Buscando tus visitas…';
+    document.getElementById('btn').disabled = true;
+    llamarApi({ accion: 'estado', tel: t }, recibe, function(){
+      r.className = 'recado malo';
+      r.textContent = 'No se pudo consultar. Intenta de nuevo en un momento.';
+      document.getElementById('btn').disabled = false;
+    });
+  }
+
+  function recibe(e){
+    if(!e.ok){
+      var r = document.getElementById('recado');
+      r.className = 'recado malo';
+      r.innerHTML = esc(e.error) +
+        ' <a href="../alta/" style="color:var(--catsup);font-weight:600">Regístrate aquí</a>.';
+      document.getElementById('btn').disabled = false;
+      return;
+    }
+    document.getElementById('vistaConsulta').classList.add('oculto');
+    var v = document.getElementById('vistaEstado');
+    v.innerHTML = dibuja(e);
+    v.classList.remove('oculto');
+  }
+
+  function fila(et, val){
+    return '<div class="fila"><span>'+esc(et)+'</span><i></i><b>'+esc(val)+'</b></div>';
+  }
+
+  function dibuja(e){
+    var hitos = {};
+    e.escalera.forEach(function(x){ hitos[x.umbral] = x; });
+
+    var sellos = '';
+    for(var n = 1; n <= e.cicloLargo; n++){
+      var c = 'sello' + (n <= e.ciclo ? ' lleno' : '') + (hitos[n] ? ' premio' : '');
+      sellos += '<span class="'+c+'"></span>';
+    }
+
+    var pasos = e.escalera.map(function(x){
+      var esSiguiente = (!x.logrado && x.umbral - e.ciclo === e.faltan);
+      var cl = 'paso' + (x.logrado ? ' hecho' : '') + (esSiguiente ? ' hoy' : '');
+      return '<div class="'+cl+'"><span class="n">'+x.umbral+'</span>' +
+             '<span class="p">'+esc(x.premio)+'</span>' +
+             '<span class="m">'+(x.logrado ? '✓' : (esSiguiente ? '←' : '·'))+'</span></div>';
+    }).join('');
+
+    var titular = e.faltan > 0
+      ? '<span class="grande">'+e.faltan+'</span>' +
+        '<span class="chico">visita'+(e.faltan===1?'':'s')+' para tu próximo premio</span>'
+      : '<span class="grande">✓</span><span class="chico">ciclo completo</span>';
+
+    return '' +
+      '<div class="ticket imprime">' +
+        '<div class="cabeza"><h1>'+esc(e.club)+'</h1><p>'+esc(e.nombre)+' · '+esc(e.nivel)+'</p></div>' +
+        '<div class="lineas">' +
+          fila('Socio', e.id) +
+          fila('Nivel', e.nivel) +
+          fila('Visitas del ciclo', e.ciclo + ' / ' + e.cicloLargo) +
+          fila('Visitas totales', e.total) +
+          fila('Última visita', e.ultimaTxt) +
+        '</div>' +
+        '<div class="titular">'+titular+'</div>' +
+        '<div class="sellos">'+sellos+'</div>' +
+        '<div class="escala"><h2>Tu escalera de premios</h2>'+pasos+'</div>' +
+      '</div>' +
+      '<div class="perforado"><span class="muesca izq"></span><span class="muesca der"></span></div>' +
+      '<div class="cupon">' +
+        '<p class="et">Lo que sigue</p>' +
+        '<p class="premio">'+esc(e.siguientePremio)+'</p>' +
+        '<p class="nota">Si vuelves dentro de los próximos 10 días te sumamos una visita extra. ' +
+        'Los martes cada visita cuenta doble.</p>' +
+      '</div>' +
+      '<p class="pie">Martes a sábado · Godogos</p>';
+  }
+
+  if(TOKEN){
+    llamarApi({ accion: 'estadoToken', token: TOKEN }, recibe, function(){});
+  }
+</script>
+</body>
+</html>
 
