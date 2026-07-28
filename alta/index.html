@@ -2,6 +2,13 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<!-- Sin esta línea el celular renderiza a ~980px y aleja toda la página.
+     En Apps Script la inyectaba el servidor; como sitio propio va explícita. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F2B01E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -12,12 +19,18 @@
     --humo:#948D82; --linea:#D9D0BE;
   }
   *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
   html,body{margin:0;min-height:100%}
   body{
     background:var(--mostaza);
     background-image:radial-gradient(circle at 50% 0%, #F7C24A 0%, var(--mostaza) 55%);
     font-family:'Archivo',system-ui,sans-serif;color:var(--tinta);
-    padding:26px 16px 48px;display:flex;justify-content:center;
+    min-height:100dvh;
+    padding-top:clamp(14px,4.5vw,28px);
+    padding-bottom:clamp(28px,9vw,50px);
+    padding-left:max(clamp(10px,3.5vw,16px),env(safe-area-inset-left));
+    padding-right:max(clamp(10px,3.5vw,16px),env(safe-area-inset-right));
+    display:flex;justify-content:center;align-items:flex-start;
   }
   .marco{width:100%;max-width:372px}
 
@@ -84,6 +97,23 @@
 
   .pie{text-align:center;font-family:'Space Mono';font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mostaza-honda);margin:26px 0 0}
   .oculto{display:none !important}
+
+  /* celulares chicos: nada baja de 16px en los campos, o iOS hace zoom solo */
+  @media (max-width:360px){
+    .ticket{padding:20px 16px 18px}
+    .cabeza h1{font-size:25px}
+    .gancho .regalo{font-size:19px}
+    .gancho .letra{font-size:12.5px}
+    .campo input{font-size:16px;padding:12px 10px}
+    .campo input.mono{font-size:19px}
+    .enviar{font-size:17px;padding:15px}
+    .pase .premio{font-size:23px}
+    .clave{font-size:32px;letter-spacing:.16em}
+  }
+  @media (max-height:620px){
+    .gancho .letra{font-size:12.5px}
+    .campo{margin:0 0 10px}
+  }
 </style>
 </head>
 <body>
@@ -155,19 +185,44 @@
 
   /* Llama a la API. Primero POST con text/plain (petición simple, sin
      preflight de CORS). Si el navegador lo bloquea, cae a JSONP por GET. */
+  var DEBUG = new URLSearchParams(location.search).get('debug') === '1';
+
+  /* Llama a la API. Primero POST con text/plain (petición simple, sin
+     preflight de CORS). Si falla, cae a JSONP por GET. Guarda el motivo
+     de cada intento para poder diagnosticar con ?debug=1 */
   function llamarApi(cuerpo, exito, falla){
+    var pistas = [];
     fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(cuerpo),
       redirect: 'follow'
     })
-    .then(function(r){ return r.json(); })
-    .then(exito)
-    .catch(function(){ jsonp(cuerpo, exito, falla); });
+    .then(function(r){
+      return r.text().then(function(t){ return { estado: r.status, texto: t }; });
+    })
+    .then(function(res){
+      try {
+        exito(JSON.parse(res.texto));
+      } catch (e) {
+        pistas.push('POST respondió ' + res.estado + ' pero no era JSON');
+        if (/PIN|Pantalla de caja|ÚNETE AL/i.test(res.texto)) {
+          pistas.push('el backend devolvió una pantalla HTML: la versión '
+            + 'desplegada no tiene la API. Redespliega el Codigo.gs v1.4 o mayor.');
+        } else if (/no existe|does not exist/i.test(res.texto)) {
+          pistas.push('Google dice que ese /exec no existe: la URL está mal '
+            + 'o la implementación se borró.');
+        }
+        jsonp(cuerpo, exito, falla, pistas);
+      }
+    })
+    .catch(function(e){
+      pistas.push('POST bloqueado por el navegador: ' + e.message);
+      jsonp(cuerpo, exito, falla, pistas);
+    });
   }
 
-  function jsonp(cuerpo, exito, falla){
+  function jsonp(cuerpo, exito, falla, pistas){
     var fn = 'cg' + Date.now();
     var d = cuerpo.datos || {};
     var q = new URLSearchParams({
@@ -181,8 +236,13 @@
     var listo = false;
     window[fn] = function(res){ listo = true; exito(res); limpiar(); };
     function limpiar(){ try{ delete window[fn]; sc.remove(); }catch(e){} }
-    sc.onerror = function(){ falla(); limpiar(); };
-    setTimeout(function(){ if(!listo){ falla(); limpiar(); } }, 12000);
+    sc.onerror = function(){
+      pistas.push('JSONP también falló: el /exec no respondió JavaScript válido');
+      falla(pistas); limpiar();
+    };
+    setTimeout(function(){
+      if(!listo){ pistas.push('JSONP sin respuesta en 12 s'); falla(pistas); limpiar(); }
+    }, 12000);
     sc.src = API + '?' + q.toString();
     document.body.appendChild(sc);
   }
@@ -240,9 +300,14 @@
       $('vistaFin').innerHTML = res.yaExistia ? yaEra(res) : bienvenida(res);
       $('vistaFin').classList.remove('oculto');
       window.scrollTo(0,0);
-    }, function(){
+    }, function(pistas){
       r.className = 'recado malo';
-      r.textContent = 'No se pudo registrar. Intenta otra vez o pásate a la caja.';
+      r.innerHTML = 'No se pudo registrar. Intenta otra vez o pásate a la caja.' +
+        (DEBUG && pistas && pistas.length
+          ? '<br><br><span style="font-family:\'Space Mono\',monospace;font-size:11px;' +
+            'text-align:left;display:block;color:#5c534a">· ' +
+            pistas.map(esc).join('<br>· ') + '</span>'
+          : '');
       $('btn').disabled = false;
     });
   }
@@ -283,4 +348,3 @@
 </script>
 </body>
 </html>
-
