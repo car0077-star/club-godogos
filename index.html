@@ -3,15 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="theme-color" content="#221E1A">
+<meta name="theme-color" content="#C51717">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="iconos/icono-192.png">
+<link rel="apple-touch-icon" href="iconos/apple-touch-icon-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="iconos/favicon-32.png">
 <title>Club Godogos</title>
 <style>
-  :root{ --mostaza:#F2B01E; --tinta:#221E1A; --catsup:#C4362B; }
+  :root{ --rojo:#C51717; --amarillo:#FFCE00; --tinta:#221E1A; }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{
     height:100%;width:100%;overflow:hidden;background:var(--tinta);
@@ -23,31 +24,66 @@
      Si algún día cambia la altura del aviso, ajusta --aviso. */
   :root{ --aviso:42px }
   #ventana{
-    position:fixed;inset:0;height:100dvh;overflow:hidden;background:var(--mostaza);
+    position:fixed;inset:0;height:100dvh;overflow:hidden;background:var(--rojo);
     padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
   }
   #app{
     position:absolute;left:0;width:100%;border:0;display:block;
     top:calc(var(--aviso) * -1);
     height:calc(100% + var(--aviso));
-    background:var(--mostaza);
+    background:var(--rojo);
   }
 
-  /* pantalla de arranque */
+  /* ---------- pantalla de arranque ----------
+     Fondo en el rojo de la marca y el logo en amarillo, sin recuadro.
+     El indicador de carga es una línea de mostaza que se dibuja sola:
+     SVG y CSS, sin GIF y sin pedir un archivo extra. */
   #splash{
-    position:fixed;inset:0;background:var(--mostaza);z-index:10;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
-    font-family:system-ui,-apple-system,sans-serif;transition:opacity .35s ease;
+    position:fixed;inset:0;height:100dvh;background:var(--rojo);z-index:10;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:26px;font-family:system-ui,-apple-system,sans-serif;
+    transition:opacity .4s ease;
   }
   #splash.fuera{opacity:0;pointer-events:none}
-  #splash img{width:96px;height:96px;border-radius:20px;box-shadow:0 8px 20px rgba(60,40,0,.28)}
-  #splash p{color:var(--tinta);font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:600}
-  .puntos{display:flex;gap:6px}
-  .puntos i{width:7px;height:7px;border-radius:50%;background:var(--tinta);opacity:.25;animation:late 1.1s infinite}
-  .puntos i:nth-child(2){animation-delay:.15s}
-  .puntos i:nth-child(3){animation-delay:.3s}
-  @keyframes late{0%,100%{opacity:.25}50%{opacity:1}}
-  @media (prefers-reduced-motion:reduce){ .puntos i{animation:none} }
+
+  .logo{width:clamp(96px,26vw,138px);height:auto;display:block;
+        filter:drop-shadow(0 10px 22px rgba(0,0,0,.22));
+        animation:entra .62s cubic-bezier(.22,1.2,.36,1) both}
+  .logo path{fill:var(--amarillo)}
+  @keyframes entra{
+    from{opacity:0;transform:scale(.82) translateY(10px)}
+    to{opacity:1;transform:none}
+  }
+
+  .rotulo{
+    color:var(--amarillo);font-size:clamp(11px,3vw,13px);letter-spacing:.3em;
+    text-transform:uppercase;font-weight:700;margin:0;text-align:center;
+    animation:asoma .5s ease .28s both;
+  }
+  .rotulo span{display:block;font-size:9.5px;letter-spacing:.22em;font-weight:600;
+               color:rgba(255,206,0,.55);margin-top:7px}
+  @keyframes asoma{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* la mostaza que se dibuja: indicador de carga */
+  .mostaza{width:150px;height:26px;overflow:visible;
+           animation:asoma .5s ease .4s both}
+  .mostaza path{
+    fill:none;stroke:var(--amarillo);stroke-width:5;
+    stroke-linecap:round;stroke-linejoin:round;
+    stroke-dasharray:210;stroke-dashoffset:210;
+    animation:embadurna 1.7s ease-in-out infinite;
+  }
+  @keyframes embadurna{
+    0%{stroke-dashoffset:210;opacity:.35}
+    45%{stroke-dashoffset:0;opacity:1}
+    55%{stroke-dashoffset:0;opacity:1}
+    100%{stroke-dashoffset:-210;opacity:.35}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .logo,.rotulo,.mostaza{animation:none}
+    .mostaza path{animation:none;stroke-dashoffset:0;opacity:.9}
+  }
 
   /* aviso de sin conexión */
   #caido{
@@ -56,10 +92,10 @@
     text-align:center;font-family:system-ui,-apple-system,sans-serif;
   }
   #caido.ver{display:flex}
-  #caido h1{color:var(--mostaza);font-size:24px;letter-spacing:.02em}
+  #caido h1{color:var(--amarillo);font-size:24px;letter-spacing:.02em}
   #caido p{font-size:15px;line-height:1.5;color:#B8B1A7;max-width:320px}
   #caido button{
-    margin-top:6px;padding:14px 26px;border:0;border-radius:10px;background:var(--mostaza);
+    margin-top:6px;padding:14px 26px;border:0;border-radius:10px;background:var(--rojo);
     color:var(--tinta);font-size:16px;font-weight:700;cursor:pointer;
   }
 
@@ -77,9 +113,13 @@
 <body>
 
 <div id="splash">
-  <img src="iconos/icono-192.png" alt="">
-  <p>Club Godogos</p>
-  <div class="puntos"><i></i><i></i><i></i></div>
+  <svg class="logo" viewBox="0 0 1000 1000" role="img" aria-label="Godogos">
+    <path fill-rule="evenodd" d="M 289.98 943.92 C 265.33 940.33 247.36 931.81 233.34 917.08 C 223.93 907.21 216.51 893.39 213.60 880.36 C 212.58 875.77 211.38 870.58 210.93 868.81 L 210.12 865.59 L 201.19 871.05 C 188.81 878.64 168.58 888.64 156.98 892.92 C 139.01 899.54 127.49 901.57 107.74 901.58 C 86.92 901.59 77.03 899.47 61.31 891.63 C 27.01 874.51 2.46 834.25 0.37 791.67 C -0.75 768.80 3.64 749.66 15.64 725.07 C 21.60 712.87 22.76 709.51 22.24 706.02 C 21.90 703.69 20.26 693.75 18.61 683.93 C 16.97 674.11 15.02 659.81 14.28 652.15 C 11.30 620.98 18.25 586.04 33.66 554.76 L 39.82 542.26 L 39.95 502.38 C 40.11 454.21 42.61 431.13 51.82 392.86 C 71.35 311.70 118.67 231.07 179.28 175.67 C 244.54 116.01 320.95 78.30 408.33 62.61 C 442.60 56.46 456.90 55.35 500.60 55.44 C 552.28 55.54 568.65 57.20 605.95 66.09 C 630.81 72.02 648.22 77.36 670.08 85.78 C 680.14 89.66 688.98 92.46 689.72 92.01 C 690.46 91.56 694.21 88.89 698.04 86.08 C 714.49 74.01 737.42 63.30 759.28 57.47 C 769.51 54.74 773.23 54.38 791.67 54.29 C 816.02 54.17 822.83 55.51 840.23 63.85 C 866.48 76.43 882.10 99.68 885.64 131.45 C 886.83 142.08 886.74 146.41 885.09 159.63 L 884.56 163.91 L 893.17 165.45 C 941.66 174.10 975.70 199.20 991.07 237.62 C 997.49 253.65 999.25 265.08 999.32 291.07 C 999.37 309.14 998.86 317.90 997.19 327.38 C 991.02 362.47 981.11 394.33 964.41 432.74 L 957.69 448.21 L 958.70 456.55 C 959.26 461.13 959.79 480.42 959.88 499.40 C 960.05 536.25 958.87 550.44 952.93 582.74 C 935.17 679.46 881.84 769.67 804.17 834.38 C 759.73 871.40 703.08 902.77 647.62 921.07 C 573.69 945.47 486.46 950.66 405.15 935.50 L 391.85 933.02 L 381.94 935.48 C 346.70 944.22 313.15 947.30 289.98 943.92 Z M 351.19 902.39 C 389.10 896.81 426.04 884.81 469.05 864.10 C 576.06 812.57 702.64 720.56 778.34 639.29 C 811.97 603.17 838.71 569.35 864.93 529.76 C 929.46 432.33 959.71 357.45 959.90 294.64 C 960.01 261.06 952.79 240.52 935.05 223.92 C 921.99 211.70 905.16 204.75 888.74 204.78 C 859.82 204.84 833.35 221.79 792.71 266.27 C 755.66 306.83 744.58 317.42 654.15 398.76 C 498.10 539.10 492.44 544.37 424.95 611.85 C 348.83 687.97 299.45 745.24 274.95 785.80 C 247.28 831.60 242.42 870.24 261.95 889.19 C 268.16 895.22 278.89 900.44 289.88 902.79 C 302.43 905.47 331.55 905.27 351.19 902.39 Z M 121.62 793.80 C 129.46 789.39 131.31 785.01 132.29 768.51 C 133.81 743.09 140.68 727.49 158.33 709.43 C 169.84 697.65 183.55 688.25 201.53 679.79 C 226.86 667.87 245.15 662.70 288.10 655.35 C 334.06 647.48 355.23 641.44 372.50 631.27 C 399.29 615.49 410.50 586.93 401.11 558.37 C 397.78 548.23 393.61 540.09 380.38 517.86 C 361.43 486.01 361.88 487.85 371.93 483.29 C 387.58 476.20 404.89 471.37 446.43 462.51 C 493.28 452.53 513.34 446.73 533.02 437.48 C 562.36 423.68 578.78 405.91 585.79 380.35 C 589.12 368.22 588.50 351.69 584.00 332.74 C 582.29 325.54 580.57 316.60 580.17 312.89 C 579.49 306.60 579.67 305.93 582.73 303.09 C 586.67 299.43 601.13 292.32 636.90 276.42 C 691.16 252.31 705.40 244.55 717.84 232.31 C 725.95 224.33 731.88 214.64 734.35 205.33 C 735.04 202.72 736.44 194.97 737.46 188.10 C 739.76 172.52 743.19 165.20 751.94 157.21 C 759.08 150.69 769.39 145.25 786.99 138.74 C 799.57 134.09 804.82 129.65 807.22 121.65 C 809.80 113.02 806.00 103.53 797.71 97.94 C 789.54 92.44 776.63 95.45 748.21 109.49 C 715.16 125.82 699.22 147.32 697.01 178.57 C 696.10 191.44 694.78 195.35 689.23 201.67 C 680.38 211.75 663.21 220.96 619.05 239.32 C 562.96 262.65 543.85 274.30 537.14 289.29 C 533.90 296.53 534.89 308.97 540.49 331.44 C 544.99 349.50 545.45 352.68 545.00 362.39 C 544.39 375.33 542.22 380.26 533.60 388.32 C 520.98 400.13 503.79 405.73 437.50 419.65 C 354.91 436.98 325.63 450.89 321.16 474.93 C 318.38 489.86 323.47 504.65 341.97 535.44 C 357.46 561.21 361.87 571.08 361.89 579.97 C 361.90 585.53 361.35 587.38 358.78 590.44 C 350.50 600.28 325.04 608.01 262.50 619.66 C 220.44 627.51 208.76 630.47 192.47 637.46 C 166.36 648.67 149.88 659.65 130.83 678.55 C 111.33 697.90 101.15 714.16 94.57 736.48 C 90.83 749.18 89.19 774.03 91.61 781.37 C 95.93 794.48 110.03 800.31 121.62 793.80 Z M 197.57 536.37 C 271.26 469.61 345.74 402.10 363.10 386.33 C 380.45 370.57 414.73 339.48 439.28 317.23 C 463.83 294.99 501.63 260.71 523.26 241.07 C 544.90 221.43 576.44 192.80 593.36 177.45 L 624.11 149.54 L 616.52 147.39 C 599.63 142.61 580.72 142.57 565.48 147.29 C 539.74 155.25 491.65 188.65 412.50 253.55 C 396.79 266.43 366.79 290.55 345.83 307.14 C 248.86 383.93 195.98 429.14 149.59 474.93 C 79.44 544.15 59.73 575.70 55.39 625.74 C 54.69 633.69 56.49 658.69 57.92 661.01 C 58.75 662.34 43.31 676.13 197.57 536.37 Z"/>
+  </svg>
+  <p class="rotulo">Club Godogos<span>Pantalla de caja</span></p>
+  <svg class="mostaza" viewBox="0 0 150 26" aria-hidden="true">
+    <path d="M4 13 C 16 -2, 28 28, 40 13 S 64 -2, 75 13 S 99 28, 111 13 S 134 -2, 146 13"/>
+  </svg>
 </div>
 
 <div id="caido">
